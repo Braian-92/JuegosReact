@@ -5,25 +5,29 @@ interface WriteModuleProps {
   wordAudioSrc?: string;
   letterAudioPath?: string;
   onComplete: () => void;
+  onCorrectLetter: () => void;
+  onErrorLetter: () => void;
 }
 
 const WriteModule: React.FC<WriteModuleProps> = ({
   word,
-  wordAudioSrc = `${process.env.PUBLIC_URL}/audio/words/${word.toUpperCase()}.mp3`,
+  wordAudioSrc    = `${process.env.PUBLIC_URL}/audio/words/${word.toUpperCase()}.mp3`,
   letterAudioPath = `${process.env.PUBLIC_URL}/audio/letters`,
   onComplete,
+  onCorrectLetter,
+  onErrorLetter,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const effectAudioPath = `${process.env.PUBLIC_URL}/audio/efects`;
 
-  // Reset and play word audio when word changes
+  // Reiniciar y reproducir la palabra al cambiar
   useEffect(() => {
     setCurrentIndex(0);
     const audio = new Audio(wordAudioSrc);
-    audio.play().catch((err) => console.error('Error reproduciendo palabra:', err));
+    audio.play().catch(err => console.error('Error reproduciendo palabra:', err));
   }, [word, wordAudioSrc]);
 
-  // Handle key presses
+  // Manejar pulsaciones de teclas
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
@@ -31,24 +35,22 @@ const WriteModule: React.FC<WriteModuleProps> = ({
 
       const expected = word[currentIndex]?.toLowerCase();
       if (key !== expected) {
-        // Wrong letter sound
+        onErrorLetter();
         new Audio(`${effectAudioPath}/ERROR.mp3`).play().catch(console.error);
         return;
       }
 
-      // Correct letter sound
+      // Letra correcta
+      onCorrectLetter();
       new Audio(`${letterAudioPath}/${key.toUpperCase()}.mp3`).play().catch(console.error);
 
-      // Advance or complete
       const next = currentIndex + 1;
       if (next >= word.length) {
+        // Al completar palabra
         setCurrentIndex(next);
-        // Play bonus then advance shortly after
         const bonus = new Audio(`${effectAudioPath}/BONUS.mp3`);
         bonus.play().catch(console.error);
-        bonus.addEventListener('ended', () => {
-          setTimeout(() => onComplete(), 0);
-        });
+        bonus.addEventListener('ended', () => onComplete());
       } else {
         setCurrentIndex(next);
       }
@@ -56,9 +58,17 @@ const WriteModule: React.FC<WriteModuleProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, word, letterAudioPath, onComplete]);
+  }, [
+    currentIndex,
+    word,
+    letterAudioPath,
+    effectAudioPath,
+    onComplete,
+    onCorrectLetter,
+    onErrorLetter
+  ]);
 
-  // Render letters
+  // Renderizar letras coloreadas y subrayado solo en la actual
   return (
     <div style={{
       width: '100vw',
@@ -66,13 +76,13 @@ const WriteModule: React.FC<WriteModuleProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      pointerEvents: 'none',
+      pointerEvents: 'none'
     }}>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         {word.split('').map((char, idx) => {
-          let color = 'red'; // pending
-          if (idx < currentIndex) color = 'green'; // typed
-          if (idx === currentIndex) color = 'yellow'; // current
+          let color = 'red';
+          if (idx < currentIndex) color = 'green';
+          if (idx === currentIndex) color = 'yellow';
           const fontSize = `${Math.min(20, 100 / word.length)}vw`;
           const underline = idx === currentIndex;
           return (

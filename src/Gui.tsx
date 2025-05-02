@@ -4,9 +4,16 @@ import WriteModule from './components/WriteModule';
 interface GuiProps {
   word: string;
   onComplete: () => void;
+  onCorrectLetter: () => void;
+  onErrorLetter: () => void;
 }
 
-const Gui: React.FC<GuiProps> = ({ word, onComplete }) => (
+const Gui: React.FC<GuiProps> = ({
+  word,
+  onComplete,
+  onCorrectLetter,
+  onErrorLetter
+}) => (
   <div style={{
     position:       'absolute',
     top:            0,
@@ -19,7 +26,12 @@ const Gui: React.FC<GuiProps> = ({ word, onComplete }) => (
     zIndex:         1,
     pointerEvents:  'auto'
   }}>
-    <WriteModule word={word} onComplete={onComplete} />
+    <WriteModule
+      word={word}
+      onComplete={onComplete}
+      onCorrectLetter={onCorrectLetter}
+      onErrorLetter={onErrorLetter}
+    />
   </div>
 );
 
