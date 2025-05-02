@@ -1,3 +1,7 @@
+# PROPIOS
+
+build/
+
 # Logs
 logs
 *.log
