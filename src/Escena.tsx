@@ -9,7 +9,19 @@ const Escena: React.FC = () => {
     if (!mountRef.current) return;
     const container = mountRef.current;
 
-    // Set up scene, camera, renderer
+    // Apply gradient background to container
+    Object.assign(container.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100vw',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #4ade80 0%, #3b82f6 50%, #9333ea 100%)',
+      zIndex: '0',
+      pointerEvents: 'none'
+    });
+
+    // Three.js setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -29,31 +41,27 @@ const Escena: React.FC = () => {
       width: '100vw',
       height: '100vh',
       zIndex: '0',
-      pointerEvents: 'none',
+      pointerEvents: 'none'
     });
     container.appendChild(renderer.domElement);
 
-    // Create a rotating cube
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshNormalMaterial();
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-    // Orbit controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 1;
 
-    // Handle window resize
-    const onResize = () => {
+    const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
-    window.addEventListener('resize', onResize);
+    window.addEventListener('resize', handleResize);
 
-    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
@@ -61,31 +69,20 @@ const Escena: React.FC = () => {
     };
     animate();
 
-    // Cleanup
+    // Cleanup on unmount
     return () => {
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', handleResize);
       controls.dispose();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
     };
   }, []);
 
-  // Gradient wrapper + transparent WebGL canvas
-  return (
-    <div
-      ref={mountRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        background: 'linear-gradient(135deg, #4ade80 0%, #3b82f6 50%, #9333ea 100%)',
-      }}
-    />
-  );
+  return <div ref={mountRef} />;
 };
 
 export default Escena;

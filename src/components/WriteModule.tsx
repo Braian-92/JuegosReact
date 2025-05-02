@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
-// Props for the WriteModule component
 interface WriteModuleProps {
   word: string;
   wordAudioSrc?: string;
   letterAudioPath?: string;
-  onComplete?: () => void;
+  onComplete: () => void;
 }
 
 const WriteModule: React.FC<WriteModuleProps> = ({
@@ -15,83 +14,53 @@ const WriteModule: React.FC<WriteModuleProps> = ({
   onComplete,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [completed, setCompleted] = useState(false);
-  const [started, setStarted] = useState(false);
 
-  // Reset when word changes
+  // 1) Al cambiar la palabra: reiniciar índice y reproducir audio solo UNA vez
   useEffect(() => {
     setCurrentIndex(0);
-    setCompleted(false);
-    setStarted(false);
-  }, [word]);
-
-  // Notify parent when complete
-  useEffect(() => {
-    if (completed) {
-      onComplete?.();
-    }
-  }, [completed, onComplete]);
-
-  // Play word audio
-  const playWordAudio = () => {
     const audio = new Audio(wordAudioSrc);
-    audio.play().catch((err) => console.error('Error reproduciendo palabra:', err));
-  };
+    audio.play().catch((err) =>
+      console.error('Error reproduciendo palabra:', err)
+    );
+  }, [word, wordAudioSrc]);
 
-  // Handle key presses
+  // 2) Manejar pulsaciones de tecla y reproducir audio de letra
   useEffect(() => {
-    if (!started) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (completed) return;
       const key = e.key.toLowerCase();
       const expected = word[currentIndex]?.toLowerCase();
-      if (!/^[a-zñ]$/.test(key)) return;
-      if (key === expected) {
-        const audioSrc = `${letterAudioPath}/${key.toUpperCase()}.mp3`;
-        const letterAudio = new Audio(audioSrc);
-        letterAudio.play().catch((err) => console.error('Error reproducir letra:', err));
-        setCurrentIndex((i) => {
-          const next = i + 1;
-          if (next >= word.length) setCompleted(true);
-          return next;
-        });
+      if (!/^[a-zñ]$/.test(key) || key !== expected) return;
+
+      // Reproducir audio de la letra
+      new Audio(`${letterAudioPath}/${key.toUpperCase()}.mp3`)
+        .play()
+        .catch((err) => console.error('Error reproducir letra:', err));
+
+      // Avanzar o completar
+      const next = currentIndex + 1;
+      if (next >= word.length) {
+        onComplete();              // notificar al padre
+      } else {
+        setCurrentIndex(next);
       }
     };
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [started, currentIndex, completed, word, letterAudioPath]);
+  }, [currentIndex, word, letterAudioPath, onComplete]);
 
-  // Start game
-  const handleStart = () => {
-    setStarted(true);
-    playWordAudio();
-  };
-
-  // Render start button
-  if (!started) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <button
-          onClick={handleStart}
-          className="px-8 py-4 bg-white text-indigo-600 text-2xl font-semibold rounded-lg shadow-lg hover:bg-gray-100"
-        >
-          Iniciar juego
-        </button>
-      </div>
-    );
-  }
-
-  // Render word
+  // 3) Renderizar la palabra siempre centrada
   return (
-    <div className="w-full h-screen flex items-center justify-center">
+    <div className="w-full h-screen flex items-center justify-center pointer-events-none">
       <div className="flex space-x-4">
         {word.split('').map((char, idx) => {
-          const size = `${Math.min(20, 100 / word.length)}vw`;
+          const fontSize = `${Math.min(20, 100 / word.length)}vw`;
+          const color    = idx < currentIndex ? 'text-green-400' : 'text-white/70';
           return (
             <span
               key={idx}
-              className={`select-none ${idx < currentIndex ? 'text-green-400' : 'text-white/70'}`}
-              style={{ fontSize: size, fontWeight: 700 }}
+              className={`select-none ${color}`}
+              style={{ fontSize, fontWeight: 700 }}
             >
               {char}
             </span>
