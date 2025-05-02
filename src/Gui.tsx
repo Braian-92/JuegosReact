@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import WriteModule from './components/WriteModule';
 
-interface GuiProps {
-  word: string;
-}
+// Lista de palabras en orden alfabético
+const wordList = [
+  'ARDILLA', 'BALLENA', 'CABALLO', 'DELFIN', 'ELEFANTE',
+  'FOCA', 'GATO', 'HIPOPOTAMO', 'IGUANA', 'JIRAFA',
+  'KOALA', 'LORO', 'MARIPOSA', 'NANDU', 'NUTRIA',
+  'OSO', 'PERRO', 'QUIRQUINCHO', 'RATON', 'SAPO',
+  'TORTUGA', 'URRACA', 'VACA', 'YACARE', 'ZORRO'
+];
 
-const Gui: React.FC<GuiProps> = ({ word }) => {
+const Gui: React.FC = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleNext = () => {
+    setCurrentIndex((i) => (i + 1 < wordList.length ? i + 1 : 0));
+  };
+
   return (
     <div
       style={{
@@ -21,7 +32,10 @@ const Gui: React.FC<GuiProps> = ({ word }) => {
         pointerEvents: 'auto',
       }}
     >
-      <WriteModule word={word} />
+      <WriteModule
+        word={wordList[currentIndex]}
+        onComplete={handleNext}
+      />
     </div>
   );
 };

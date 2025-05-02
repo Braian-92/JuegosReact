@@ -4,8 +4,10 @@ import Gui from './Gui';
 
 const App: React.FC = () => (
   <div className="App w-full h-screen relative overflow-hidden">
+    {/* Fondo 3D */}
     <Escena />
-    <Gui word="PERRO" />
+    {/* Capa de interfaz */}
+    <Gui />
   </div>
 );
 
