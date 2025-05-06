@@ -29,6 +29,10 @@ Sigue estos pasos para ejecutar el proyecto en tu máquina local.
 
 * **Node.js** (versión 14 o superior) y **npm** instalados. Puedes descargarlo en [https://nodejs.org/](https://nodejs.org/)
 
+* **Activar Scripts desde consola de powershell**
+```bash
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
 ### 2. Clonar el repositorio
 
 ```bash
