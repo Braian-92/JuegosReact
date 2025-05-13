@@ -3,7 +3,9 @@ import './FloatingKeyboard.css';
 
 interface Props {
   onKeyPress: (key: string) => void;
-  scale?: number; // Escala opcional
+  scale?: number;
+  highlightKey?: string;
+  showHighlight?: boolean;
 }
 
 const keys: string[][] = [
@@ -13,7 +15,12 @@ const keys: string[][] = [
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
 ];
 
-export default function FloatingKeyboard({ onKeyPress, scale = 1 }: Props) {
+export default function FloatingKeyboard({
+  onKeyPress,
+  scale = 1,
+  highlightKey,
+  showHighlight = true
+}: Props) {
   return (
     <div
       className="floating-keyboard"
@@ -24,11 +31,18 @@ export default function FloatingKeyboard({ onKeyPress, scale = 1 }: Props) {
     >
       {keys.map((row, rowIndex) => (
         <div key={rowIndex} className="keyboard-row">
-          {row.map((key) => (
-            <button key={key} className="key" onClick={() => onKeyPress(key)}>
-              {key}
-            </button>
-          ))}
+          {row.map((key) => {
+            const isHighlighted = showHighlight && highlightKey?.toUpperCase() === key;
+            return (
+              <button
+                key={key}
+                className={`key ${isHighlighted ? 'highlighted' : ''}`}
+                onClick={() => onKeyPress(key)}
+              >
+                {key}
+              </button>
+            );
+          })}
         </div>
       ))}
     </div>

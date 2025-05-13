@@ -109,7 +109,11 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
         </div>
       </div>
 
-      <FloatingKeyboard onKeyPress={handleLetterInput} scale={2} />
+      <FloatingKeyboard
+        onKeyPress={handleLetterInput}
+        scale={2}
+        highlightKey={currentWord[input.length]}
+      />
     </div>
   );
 }

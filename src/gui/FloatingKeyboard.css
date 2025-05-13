@@ -2,7 +2,6 @@
   position: fixed;
   bottom: 1rem;
   left: 50%;
-  transform: translateX(-50%);
   background-color: rgba(30, 30, 30, 0.95);
   padding: 1rem;
   border-radius: 1rem;
@@ -32,4 +31,8 @@
 
 .key:hover {
   background-color: #666;
+}
+
+.key.highlighted {
+  box-shadow: inset 0 0 0 3px violet, 0 0 10px violet;
 }
