@@ -30,6 +30,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
   const [mistakes, setMistakes] = useState<number>(0);
   const [xp, setXp] = useState<number>(0);
 
+  const textScale = 2.2; // ✅ Escala de texto ajustable
   const level = Math.floor(xp / 100) + 1;
 
   const handleLetterInput = useCallback((key: string) => {
@@ -65,7 +66,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
   useEffect(() => {
     if (input === currentWord) {
       playSuccessSound();
-      setXp(prev => prev + XP_POR_PALABRA); // ⭐ suma puntos definidos por el juego
+      setXp(prev => prev + XP_POR_PALABRA);
       const nextIndex = (WORDS.indexOf(currentWord) + 1) % WORDS.length;
       setCompletedWords(prev => prev + 1);
       setTimeout(() => {
@@ -85,7 +86,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
       <TopBar overrideXp={xp} overrideLevel={level} extraButton={{ label: '↩ Volver', onClick: onExit }} />
       <BaseScene onSceneReady={handleSceneReady} />
 
-      <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+      <div style={{ textAlign: 'center', marginTop: '4rem', transform: `scale(${textScale})`, transformOrigin: 'top center' }}>
         <h2>Escribí la palabra:</h2>
         <h1 style={{ fontSize: '4rem', letterSpacing: '1rem' }}>
           {currentWord.split('').map((letter, idx) => {
@@ -117,7 +118,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
 
       <FloatingKeyboard
         onKeyPress={handleLetterInput}
-        scale={2}
+        scale={1.5}
         highlightKey={currentWord[input.length]}
         showHighlight={true}
       />
