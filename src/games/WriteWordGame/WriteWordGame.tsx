@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { playLetter, playWord, playSuccessSound, playErrorSound } from '../../core/logic/audioPlayer';
 import BaseScene from '../../scenes/BaseScene';
 import SpinningCube from '../../scenes/environments/SpinningCube';
+import FloatingKeyboard from '../../gui/FloatingKeyboard';
 
 interface WriteModuleProps {
   word?: string;
@@ -24,6 +25,18 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
   const [completedWords, setCompletedWords] = useState<number>(0);
   const [mistakes, setMistakes] = useState<number>(0);
 
+  const handleLetterInput = useCallback((key: string) => {
+    const nextLetter = currentWord[input.length];
+    if (key === nextLetter) {
+      playLetter(key);
+      setInput(prev => prev + key);
+      setCorrectLetters(prev => [...prev, true]);
+    } else {
+      playErrorSound();
+      setMistakes(prev => prev + 1);
+    }
+  }, [currentWord, input]);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       playWord(currentWord);
@@ -35,21 +48,12 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
     const handleKeyPress = (event: KeyboardEvent) => {
       const key = event.key.toUpperCase();
       if (key.length === 1 && /[A-ZÑ]/.test(key)) {
-        const nextLetter = currentWord[input.length];
-        if (key === nextLetter) {
-          playLetter(key);
-          setInput(prev => prev + key);
-          setCorrectLetters(prev => [...prev, true]);
-        } else {
-          playErrorSound();
-          setMistakes(prev => prev + 1);
-        }
+        handleLetterInput(key);
       }
     };
-
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentWord, input]);
+  }, [handleLetterInput]);
 
   useEffect(() => {
     if (input === currentWord) {
@@ -104,6 +108,8 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
           <p>Errores: {mistakes}</p>
         </div>
       </div>
+
+      <FloatingKeyboard onKeyPress={handleLetterInput} scale={2} />
     </div>
   );
 }
