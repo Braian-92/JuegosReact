@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import WriteWordGame from '../games/WriteWordGame/WriteWordGame';
 import GamePlaceholder from '../games/Common/GamePlaceholder';
+import TopBar from '../gui/TopBar';
 
 const juegos = [
   { id: 'write-word', nombre: 'Escribir Palabras', icono: '✍️' },
@@ -26,42 +27,47 @@ export default function MainMenu() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh'
-    }}>
+    <div style={{ position: 'relative', height: '100vh' }}>
+      <TopBar />
+
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
-        padding: '2rem',
-        maxWidth: '800px',
-        width: '100%'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        paddingTop: '3rem'
       }}>
-        {juegos.map(juego => (
-          <button
-            key={juego.id}
-            onClick={() => setJuegoActual(juego.id)}
-            style={{
-              fontSize: '1.2rem',
-              padding: '1rem',
-              borderRadius: '1rem',
-              backgroundColor: '#333',
-              color: 'white',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '120px',
-              boxShadow: '0 0 10px #0005'
-            }}
-          >
-            <span style={{ fontSize: '2rem' }}>{juego.icono}</span>
-            {juego.nombre}
-          </button>
-        ))}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '1rem',
+          padding: '2rem',
+          maxWidth: '800px',
+          width: '100%'
+        }}>
+          {juegos.map(juego => (
+            <button
+              key={juego.id}
+              onClick={() => setJuegoActual(juego.id)}
+              style={{
+                fontSize: '1.2rem',
+                padding: '1rem',
+                borderRadius: '1rem',
+                backgroundColor: '#333',
+                color: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '120px',
+                boxShadow: '0 0 10px #0005'
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>{juego.icono}</span>
+              {juego.nombre}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

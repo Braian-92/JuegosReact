@@ -1,0 +1,71 @@
+.inventory-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(10, 10, 10, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.inventory-panel {
+  background-color: #1e1e1e;
+  color: white;
+  padding: 1rem;
+  border-radius: 1rem;
+  width: 95%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.inventory-grid {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+  padding-bottom: 1rem;
+  justify-content: center;
+}
+
+.inventory-item {
+  background-color: #333;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  transition: opacity 0.3s;
+}
+
+.inventory-item.locked {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+.inventory-item.unlocked {
+  opacity: 1;
+}

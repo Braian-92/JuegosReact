@@ -4,6 +4,7 @@ import { playLetter, playWord, playSuccessSound, playErrorSound } from '../../co
 import BaseScene from '../../scenes/BaseScene';
 import SpinningCube from '../../scenes/environments/SpinningCube';
 import FloatingKeyboard from '../../gui/FloatingKeyboard';
+import TopBar from '../../gui/TopBar';
 
 interface WriteModuleProps {
   word?: string;
@@ -74,9 +75,10 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
 
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
+      <TopBar />
       <BaseScene onSceneReady={handleSceneReady} />
 
-      <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+      <div style={{ textAlign: 'center', marginTop: '4rem' }}>
         <h2>Escribí la palabra:</h2>
         <h1 style={{ fontSize: '4rem', letterSpacing: '1rem' }}>
           {currentWord.split('').map((letter, idx) => {
@@ -111,8 +113,9 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
 
       <FloatingKeyboard
         onKeyPress={handleLetterInput}
-        scale={2}
+        scale={1.5}
         highlightKey={currentWord[input.length]}
+        showHighlight={true}
       />
     </div>
   );
