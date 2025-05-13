@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Visualizador JSON – Circle Packing</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { height: 100%; background: #1e1e1e; }
+    #chart-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #chart-container p {
+      color: #f88;
+      text-align: center;
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart-container"></div>
+
+  <!-- Librerías -->
+  <script src="https://echarts.apache.org/en/js/vendors/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://echarts.apache.org/en/js/vendors/echarts/dist/echarts.min.js"></script>
+  <script src="https://echarts.apache.org/en/js/vendors/d3-hierarchy@2.0.0/dist/d3-hierarchy.min.js"></script>
+
+  <script>
+    // 1) Inicializa ECharts
+    const dom = document.getElementById('chart-container');
+    const myChart = echarts.init(dom, null, { renderer: 'canvas' });
+
+    // 2) URL HTTP donde sirve tu JSON original
+    const jsonUrl = 'http://localhost/JuegosReact/estructura-proyectos/JuegosReact_2025-05-13-00-41-26.json';
+
+    // 3) Fetch → transform → run
+    fetch(jsonUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const rawData = transform(data);
+        run(rawData);
+      })
+      .catch(err => {
+        console.error('Error al cargar datos JSON:', err);
+        dom.innerHTML = '<p>Error al cargar datos JSON:<br>' + err.message + '</p>';
+      });
+
+    // 4) transform() convierte tu JSON original a { $count, childName: {...}, ... }
+    function transform(node) {
+      const obj = {};
+      if (Array.isArray(node.hijos) && node.hijos.length) {
+        obj.$count = node.hijos.length;
+        node.hijos.forEach(child => {
+          obj[child.nombre] = transform(child);
+        });
+      } else {
+        obj.$count = node.LINEAS || 0;
+      }
+      return obj;
+    }
+
+    // === TU CÓDIGO QUE NO CAMBIÓ ===
+    function run(rawData) {
+      const { seriesData, maxDepth } = prepareData(rawData);
+      initChart(seriesData, maxDepth);
+    }
+
+    function prepareData(source) {
+      const seriesData = [];
+      let maxDepth = 0;
+      function convert(node, path, depth) {
+        if (!node) return;
+        maxDepth = Math.max(maxDepth, depth);
+        seriesData.push({
+          id: path,
+          value: node.$count,
+          depth: depth,
+          index: seriesData.length
+        });
+        for (const key in node) {
+          if (node.hasOwnProperty(key) && key !== '$count') {
+            convert(node[key], path + '/' + key, depth + 1);
+          }
+        }
+      }
+      convert(source, 'root', 0);
+      return { seriesData, maxDepth };
+    }
+
+    function initChart(seriesData, maxDepth) {
+      let displayRoot = stratify(seriesData);
+
+      function stratify(data) {
+        return d3.stratify()
+          .id(d => d.id)
+          .parentId(d => {
+            const i = d.id.lastIndexOf('/');
+            return i >= 0 ? d.id.slice(0, i) : null;
+          })
+          (data)
+          .sum(d => d.value)
+          .sort((a, b) => b.value - a.value);
+      }
+
+      function overallLayout(params, api) {
+        const ctx = params.context;
+        d3.pack()
+          .size([api.getWidth() - 2, api.getHeight() - 2])
+          .padding(3)(displayRoot);
+        ctx.nodes = {};
+        displayRoot.descendants().forEach(n => ctx.nodes[n.id] = n);
+      }
+
+      function renderItem(params, api) {
+        const ctx = params.context;
+        if (!ctx.layout) {
+          ctx.layout = true;
+          overallLayout(params, api);
+        }
+        const id = api.value('id');
+        const node = ctx.nodes[id];
+        if (!node) return;
+        const isLeaf = !node.children || !node.children.length;
+        const focus = new Uint32Array(node.descendants().map(n => n.data.index));
+        const label = isLeaf
+          ? id.slice(id.lastIndexOf('/') + 1)
+          : '';
+
+        // fontSize dinámico
+        const maxFs = node.r / 3;
+        const fsByLen = (node.r * 2) / (Math.max(label.length, 1) * 0.6);
+        let fontSize = Math.min(maxFs, fsByLen);
+        fontSize = Math.max(fontSize, 8);
+
+        return {
+          type: 'circle',
+          focus,
+          shape: { cx: node.x, cy: node.y, r: node.r },
+          transition: ['shape'],
+          z2: api.value('depth') * 2,
+          textContent: {
+            type: 'text',
+            style: {
+              text: label,
+              fontFamily: 'Arial',
+              fontSize: fontSize,
+              width: node.r * 2,
+              overflow: 'truncate',
+              fill: '#000'
+            },
+            emphasis: {
+              style: { overflow: null, fontSize: fontSize, fill: '#000' }
+            }
+          },
+          textConfig: { position: 'inside' },
+          style: { fill: api.visual('color') },
+          emphasis: {
+            style: {
+              shadowBlur: 20,
+              shadowOffsetX: 3,
+              shadowOffsetY: 5,
+              shadowColor: 'rgba(0,0,0,0.3)'
+            }
+          }
+        };
+      }
+
+      const colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666', '#8c6d31', '#e7ba52'];
+
+      const option = {
+        dataset: { source: seriesData },
+        tooltip: {},
+        visualMap: [
+          {
+            show: false,
+            min: 0,
+            max: maxDepth,
+            dimension: 'depth',
+            inRange: {
+              color: colors // Asignar colores según la profundidad
+            }
+          }
+        ],
+        hoverLayerThreshold: Infinity,
+        series: {
+          type: 'custom',
+          renderItem: renderItem,
+          coordinateSystem: 'none',
+          encode: { tooltip: 'value', itemName: 'id' }
+        }
+      };
+
+      myChart.setOption(option);
+
+      // Zoom al click
+      myChart.on('click', { seriesIndex: 0 }, params => {
+        let subtree = stratify(seriesData);
+        if (params.data.id) {
+          subtree = subtree.descendants().find(n => n.data.id === params.data.id);
+        }
+        if (subtree) subtree.parent = null;
+        displayRoot = subtree;
+        myChart.setOption({
+          dataset: {
+            source: subtree.descendants().map(n => seriesData[n.data.index])
+          }
+        });
+      });
+
+      // Reset click en fondo
+      myChart.getZr().on('click', e => {
+        if (!e.target) {
+          displayRoot = stratify(seriesData);
+          myChart.setOption({ dataset: { source: seriesData } });
+        }
+      });
+
+      // Responsive
+      window.addEventListener('resize', () => myChart.resize());
+    }
+
+    // Responsive extra (en caso de redimensionar contenedor)
+    window.addEventListener('resize', () => myChart.resize());
+    // === FIN ===
+  </script>
+</body>
+</html>
