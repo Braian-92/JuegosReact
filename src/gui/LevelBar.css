@@ -1,0 +1,61 @@
+.level-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 280px; /* Aumentado para dejar espacio */
+}
+
+.level-indicator {
+  background: gold;
+  color: black;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  min-width: 2rem;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: 0 0 6px #ffcc00;
+}
+
+.level-bar-track {
+  background-color: #444;
+  flex: 1;
+  height: 1.2rem;
+  border-radius: 0.6rem;
+  position: relative;
+  overflow: hidden;
+  min-width: 160px; /* aseguro espacio para 0 y 100 */
+}
+
+.level-bar-fill {
+  background: linear-gradient(to right, #fcd253, #fcb103);
+  height: 100%;
+  border-radius: 0.6rem 0 0 0.6rem;
+  transition: width 0.3s ease;
+}
+
+.level-bar-labels {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  font-size: 0.75rem;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  pointer-events: none;
+}
+
+.level-bar-labels span:first-child {
+  margin-left: 0.5rem;
+}
+
+.level-bar-labels span:last-child {
+  margin-right: 0.5rem;
+  min-width: 2.4ch;
+  text-align: right;
+  white-space: nowrap;
+  display: inline-block;
+}

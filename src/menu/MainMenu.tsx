@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import WriteWordGame from '../games/WriteWordGame/WriteWordGame';
 import GamePlaceholder from '../games/Common/GamePlaceholder';
-import TopBar from '../gui/TopBar';
 
 const juegos = [
   { id: 'write-word', nombre: 'Escribir Palabras', icono: '✍️' },
@@ -18,8 +17,12 @@ const juegos = [
 export default function MainMenu() {
   const [juegoActual, setJuegoActual] = useState<string | null>(null);
 
+  const handleVolver = () => {
+    setJuegoActual(null);
+  };
+
   if (juegoActual === 'write-word') {
-    return <WriteWordGame />;
+    return <WriteWordGame onExit={handleVolver} />;
   }
 
   if (juegoActual) {
@@ -28,8 +31,6 @@ export default function MainMenu() {
 
   return (
     <div style={{ position: 'relative', height: '100vh' }}>
-      <TopBar />
-
       <div style={{
         display: 'flex',
         alignItems: 'center',

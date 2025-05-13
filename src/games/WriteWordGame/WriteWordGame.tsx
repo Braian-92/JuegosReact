@@ -9,7 +9,10 @@ import TopBar from '../../gui/TopBar';
 interface WriteModuleProps {
   word?: string;
   delayMs?: number;
+  onExit?: () => void;
 }
+
+const XP_POR_PALABRA = 5;
 
 const WORDS = [
   'ARDILLA', 'BALLENA', 'CABALLO', 'DELFIN', 'ELEFANTE',
@@ -19,12 +22,15 @@ const WORDS = [
   'TORTUGA', 'URRACA', 'VACA', 'YACARE', 'ZORRO'
 ];
 
-export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps) {
+export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteModuleProps) {
   const [currentWord, setCurrentWord] = useState<string>(word || WORDS[0]);
   const [input, setInput] = useState<string>('');
   const [correctLetters, setCorrectLetters] = useState<boolean[]>([]);
   const [completedWords, setCompletedWords] = useState<number>(0);
   const [mistakes, setMistakes] = useState<number>(0);
+  const [xp, setXp] = useState<number>(0);
+
+  const level = Math.floor(xp / 100) + 1;
 
   const handleLetterInput = useCallback((key: string) => {
     const nextLetter = currentWord[input.length];
@@ -59,6 +65,7 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
   useEffect(() => {
     if (input === currentWord) {
       playSuccessSound();
+      setXp(prev => prev + XP_POR_PALABRA); // ⭐ suma puntos definidos por el juego
       const nextIndex = (WORDS.indexOf(currentWord) + 1) % WORDS.length;
       setCompletedWords(prev => prev + 1);
       setTimeout(() => {
@@ -75,7 +82,7 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
 
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
-      <TopBar />
+      <TopBar overrideXp={xp} overrideLevel={level} extraButton={{ label: '↩ Volver', onClick: onExit }} />
       <BaseScene onSceneReady={handleSceneReady} />
 
       <div style={{ textAlign: 'center', marginTop: '4rem' }}>
@@ -96,10 +103,7 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
             }
 
             return (
-              <span
-                key={idx}
-                style={{ color, textDecoration }}
-              >
+              <span key={idx} style={{ color, textDecoration }}>
                 {letter}
               </span>
             );
@@ -113,7 +117,7 @@ export default function WriteWordGame({ word, delayMs = 1000 }: WriteModuleProps
 
       <FloatingKeyboard
         onKeyPress={handleLetterInput}
-        scale={1.5}
+        scale={2}
         highlightKey={currentWord[input.length]}
         showHighlight={true}
       />

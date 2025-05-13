@@ -16,6 +16,7 @@ const archivosIgnorados: string[] = [
 const carpetasIgnoradas = [
   'build',
   'node_modules',
+  'src_bkp',
   'public/build',
   'public/dev',
   '.git',
