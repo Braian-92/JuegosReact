@@ -1,19 +1,19 @@
-export function playLetter(letter: string, basePath: string = '/audio/letters') {
-  const audio = new Audio(`${basePath}/${letter.toUpperCase()}.mp3`);
-  audio.play().catch(() => {});
+export function playLetter(letter: string) {
+  const audio = new Audio(`${process.env.PUBLIC_URL}/audio/letters/${letter}.mp3`);
+  audio.play();
 }
 
-export function playWord(word: string, basePath: string = '/audio/words') {
-  const audio = new Audio(`${basePath}/${word.toUpperCase()}.mp3`);
-  audio.play().catch(() => {});
+export function playWord(word: string) {
+  const audio = new Audio(`${process.env.PUBLIC_URL}/audio/words/${word}.mp3`);
+  audio.play();
 }
 
 export function playSuccessSound() {
-  const audio = new Audio('/audio/efects/BONUS.mp3');
-  audio.play().catch(() => {});
+  const audio = new Audio(`${process.env.PUBLIC_URL}/audio/efects/BONUS.mp3`);
+  audio.play();
 }
 
 export function playErrorSound() {
-  const audio = new Audio('/audio/efects/ERROR.mp3');
-  audio.play().catch(() => {});
+  const audio = new Audio(`${process.env.PUBLIC_URL}/audio/efects/ERROR.mp3`);
+  audio.play();
 }
