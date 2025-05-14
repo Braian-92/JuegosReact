@@ -2,9 +2,9 @@
 
 ## Índice
 1. [Descripción General](#descripción-general)
-2. [Estructura del Proyecto](#estructura-del-proyecto)
-3. [Componentes Principales](#componentes-principales)
-4. [Juegos Implementados](#juegos-implementados)
+2. [Estructura Completa del Proyecto](#estructura-completa-del-proyecto)
+3. [Componentes y Archivos](#componentes-y-archivos)
+4. [Documentación de Juegos](#documentación-de-juegos)
 5. [Sistema de Audio](#sistema-de-audio)
 6. [Sistema de Progresión](#sistema-de-progresión)
 7. [Interfaz de Usuario](#interfaz-de-usuario)
@@ -14,7 +14,7 @@
 
 JuegosReact es una plataforma educativa que contiene múltiples juegos interactivos diseñados para ayudar en el aprendizaje. El proyecto está construido utilizando React y TypeScript, con un enfoque en la modularidad y la experiencia del usuario.
 
-## Estructura del Proyecto
+## Estructura Completa del Proyecto
 
 ```
 JuegosReact/
@@ -22,147 +22,182 @@ JuegosReact/
 │   ├── core/
 │   │   └── logic/
 │   │       └── audioPlayer.ts       # Gestión de audio
-│   ├── games/
-│   │   ├── TraceLetterGame/        # Juego de trazado de letras
-│   │   └── WriteWordGame/          # Juego de escritura de palabras
-│   ├── gui/
-│   │   └── TopBar/                 # Barra superior común
-│   └── menu/
-│       └── MainMenu.tsx            # Menú principal
-├── public/
-│   └── audio/                      # Recursos de audio
-└── package.json
+│   │   ├── games/
+│   │   │   ├── TraceLetterGame/        # Juego de trazado de letras
+│   │   │   │   ├── TraceLetterGame.tsx
+│   │   │   │   ├── TraceLetterGame.css
+│   │   │   │   └── letterPaths.ts
+│   │   │   └── WriteWordGame/          # Juego de escritura de palabras
+│   │   │       ├── WriteWordGame.tsx
+│   │   │       └── WriteWordGame.css
+│   │   ├── gui/
+│   │   │   └── TopBar/
+│   │   │       ├── TopBar.tsx
+│   │   │       └── TopBar.css
+│   │   └── menu/
+│   │       └── MainMenu.tsx            # Menú principal
+│   │           └── MainMenu.css
+│   ├── public/
+│   │   ├── index.html
+│   │   ├── manifest.json
+│   │   └── audio/
+│   │       ├── efects/
+│   │       │   ├── BONUS.mp3
+│   │       │   └── ERROR.mp3
+│   │       ├── letters/
+│   │       │   └── [A-Z].mp3
+│   │       └── words/
+│   │           └── [palabras].mp3
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── DOCUMENTATION.md
+│   ├── GAMES.md
+│   └── README.md
 ```
 
-## Componentes Principales
+## Componentes y Archivos
 
-### MainMenu (src/menu/MainMenu.tsx)
-- **Propósito**: Menú principal de la aplicación
-- **Características**:
-  - Gestión de estado del juego actual
-  - Sistema de niveles y desbloqueo
-  - Interfaz de cuadrícula para selección de juegos
-- **Estado**:
-  - `juegoActual`: Juego seleccionado
-  - `user`: Perfil del usuario
-  - `showProfile`: Estado de visualización del perfil
+### Archivos de Configuración
 
-### AudioManager (src/core/logic/audioPlayer.ts)
-- **Propósito**: Gestión centralizada de audio
-- **Métodos**:
-  - `getAudioPath`: Obtiene la ruta del archivo de audio
-  - `playSound`: Reproduce sonidos del sistema
-- **Tipos de Audio**:
-  - success: Sonido de éxito
-  - error: Sonido de error
-  - letter: Sonido de letra
-  - word: Sonido de palabra
+#### package.json
+```json
+{
+  "name": "juegos-react",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.x",
+    "react-dom": "^18.x",
+    "typescript": "^4.x"
+  }
+}
+```
 
-## Juegos Implementados
+#### tsconfig.json
+- Configuración de TypeScript
+- Opciones estrictas habilitadas
+- Rutas de alias configuradas
+- Configuración de módulos ES6
 
-### TraceLetterGame
-**Ubicación**: `src/games/TraceLetterGame/`
+### Core
 
-#### Componentes:
-1. **TraceLetterGame.tsx**
-   - **Estado**:
-     - `currentLetter`: Letra actual (0-4 para A,E,I,O,U)
-     - `isDrawing`: Estado de dibujo activo
-     - `strokes`: Array de trazos completados
-     - `currentStroke`: Trazo actual
-     - `completedLetters`: Letras completadas
-     - `xp`: Puntos de experiencia
+#### audioPlayer.ts
+```typescript
+export class AudioManager {
+  static playSound(type: 'success' | 'error' | 'letter' | 'word', value?: string)
+  static getAudioPath(type: string, value?: string): string
+}
+```
 
-   - **Funciones Principales**:
-     - `drawScene`: Renderiza la escena del canvas
-     - `handleMouseDown`: Inicia un trazo
-     - `handleMouseMove`: Continúa el trazo
-     - `handleMouseUp`: Finaliza el trazo
-     - `handleNextLetter`: Avanza a la siguiente letra
-     - `clearCanvas`: Limpia el canvas
+### GUI
 
-2. **TraceLetterGame.css**
-   - Estilos modernos con gradientes
-   - Animaciones y transiciones
-   - Sistema de progreso visual
-   - Diseño responsivo
+#### TopBar/TopBar.tsx
+```typescript
+interface TopBarProps {
+  overrideXp?: number
+  overrideLevel?: number
+  extraButton?: {
+    label: string
+    onClick: () => void
+  }
+}
+```
 
-#### Características:
-- Canvas de 400x400 pixels
-- Sistema de trazado libre
-- Letra guía de fondo
-- Retroalimentación visual y sonora
-- Sistema de progreso de vocales
-- 3 XP por letra completada
+Características:
+- Barra superior persistente
+- Muestra XP y nivel actual
+- Botón de retorno configurable
+- Estilos responsivos
 
-### WriteWordGame
-**Ubicación**: `src/games/WriteWordGame/`
+### Menu
 
-- **Características**:
-  - Lista predefinida de palabras
-  - Sistema de escritura por teclado
-  - Validación de letras en tiempo real
-  - Retroalimentación visual y sonora
-  - 5 XP por palabra completada
+#### MainMenu.tsx
+```typescript
+interface UserProfile {
+  xp: number
+  level: number
+  completedGames: string[]
+}
+```
+
+Funcionalidades:
+- Gestión de estado de juegos
+- Sistema de desbloqueo por nivel
+- Interfaz de selección de juegos
+- Persistencia de progreso
+
+## Sistema de Audio
+
+### Estructura de Archivos de Audio
+- **Efectos** (`/public/audio/efects/`):
+  - `BONUS.mp3`: Sonido de éxito
+  - `ERROR.mp3`: Sonido de error
+
+- **Letras** (`/public/audio/letters/`):
+  - Archivos individuales para cada letra (A-Z)
+  - Formato consistente de nombrado
+
+- **Palabras** (`/public/audio/words/`):
+  - Palabras completas para el juego de escritura
+  - Nombradas según el contenido
+
+### Implementación
+```typescript
+// Ejemplo de uso del AudioManager
+AudioManager.playSound('success');
+AudioManager.playSound('letter', 'A');
+AudioManager.playSound('word', 'CASA');
+```
 
 ## Sistema de Progresión
 
-### Sistema de XP
-- Basado en acciones completadas:
-  - Trazado de letra: 3 XP
-  - Palabra completada: 5 XP
-- Nivel = Math.floor(xp / 100) + 1
+### Cálculo de Nivel
+```typescript
+const level = Math.floor(xp / 100) + 1;
+```
 
 ### Desbloqueo de Contenido
-- Juegos bloqueados por nivel
-- Indicador visual de requisitos
-- Animación de desbloqueo
+```typescript
+interface GameConfig {
+  id: string
+  nombre: string
+  nivel_requerido: number
+  icono: string
+}
+```
 
 ## Interfaz de Usuario
 
-### TopBar
-- Muestra nivel actual
-- Barra de progreso de XP
-- Botón de retorno
-- Diseño consistente en todos los juegos
+### Estilos Globales
+- Paleta de colores:
+  ```css
+  :root {
+    --primary: #4caf50;
+    --secondary: #ff9800;
+    --background: #1a1a2e;
+    --text: #ffffff;
+  }
+  ```
 
-### Elementos Comunes
-- Paleta de colores coherente
-- Animaciones suaves
-- Feedback visual y sonoro
+### Componentes Comunes
+- Botones con hover y focus states
+- Animaciones suaves (0.3s ease)
+- Feedback visual consistente
 - Diseño responsivo
 
 ## Guía de Desarrollo
 
-### Agregar Nuevo Juego
-1. Crear carpeta en `src/games/`
-2. Implementar componente principal
-3. Agregar entrada en `MainMenu.tsx`
-4. Configurar sistema de XP
-5. Implementar retroalimentación de audio
+### Estructura de Nuevo Juego
+```
+games/
+└── NuevoJuego/
+    ├── NuevoJuego.tsx
+    ├── NuevoJuego.css
+    └── types.ts
+```
 
-### Convenciones de Código
-- TypeScript estricto
-- Componentes funcionales con hooks
-- CSS modular por componente
-- Nombres descriptivos en español
+### Testing
+- Jest para pruebas unitarias
+- React Testing Library para componentes
+- Cobertura mínima requerida: 80%
 
-### Mejores Prácticas
-- Separación de lógica y presentación
-- Reutilización de componentes comunes
-- Manejo centralizado de estado
-- Documentación inline
-- Testing de componentes
-
-## Contribución
-Para contribuir al proyecto:
-1. Fork del repositorio
-2. Crear rama feature/fix
-3. Implementar cambios
-4. Crear Pull Request
-
-## Recursos
-- React Documentation
-- TypeScript Handbook
-- Canvas API MDN
-- Web Audio API 
+Para la documentación detallada de los juegos, consulte [GAMES.md](GAMES.md) 
