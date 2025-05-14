@@ -50,7 +50,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
   const { xp, level, addXp } = useUser();
 
   // Configuración visual y cálculo del nivel basado en XP
-  const textScale = 2.2;
+  const textScale = 1.2;
   const currentWord = word || WORDS[currentWordIndex];
 
   const handleLetterInput = (letter: string) => {

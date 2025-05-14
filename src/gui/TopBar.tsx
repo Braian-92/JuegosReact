@@ -16,12 +16,27 @@ interface TopBarProps {
 export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBarProps) {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const xp = overrideXp ?? 0;
   const level = overrideLevel ?? Math.floor(xp / 100) + 1;
 
   const toggleSidebar = () => setShowSidebar(prev => !prev);
   const toggleInventory = () => setShowInventory(prev => !prev);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error al intentar pantalla completa: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(err => {
+        console.error(`Error al salir de pantalla completa: ${err.message}`);
+      });
+      setIsFullscreen(false);
+    }
+  };
 
   return (
     <>
@@ -42,6 +57,9 @@ export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBa
               {extraButton.label}
             </button>
           )}
+          <button className="top-button" onClick={toggleFullscreen}>
+            {isFullscreen ? '↙️ Minimizar' : '↗️ Maximizar'}
+          </button>
           <button className="top-button" onClick={toggleSidebar}>
             {showSidebar ? '✖️ Amigos' : '👥 Amigos'}
           </button>
