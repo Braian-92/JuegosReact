@@ -40,29 +40,49 @@
 canvas {
   background: #1a1a2e;
   border-radius: 0.5rem;
-  cursor: pointer;
+  cursor: crosshair;
 }
 
-.clear-button {
+.button-container {
   position: absolute;
   bottom: -50px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.clear-button, .next-button {
   padding: 0.8rem 2rem;
   font-size: 1.1rem;
-  background: #ff9800;
   color: white;
   border: none;
   border-radius: 2rem;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.clear-button {
+  background: #ff9800;
   box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
 }
 
 .clear-button:hover {
   background: #f57c00;
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.next-button {
+  background: #4caf50;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.next-button:hover {
+  background: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
 .progress-container {

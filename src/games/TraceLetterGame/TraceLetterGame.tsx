@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '../../core/logic/audioPlayer';
 import TopBar from '../../gui/TopBar';
-import { LETTER_PATHS, POINT_RADIUS, LINE_WIDTH, POINT_COLOR, LINE_COLOR, GUIDE_COLOR, ACTIVE_POINT_COLOR, COMPLETED_POINT_COLOR } from './letterPaths';
 import './TraceLetterGame.css';
 
 interface TraceLetterGameProps {
@@ -13,20 +12,22 @@ interface Point {
   y: number;
 }
 
+interface Stroke {
+  points: Point[];
+}
+
 const VOCALES = ['A', 'E', 'I', 'O', 'U'];
 const XP_POR_LETRA = 3;
 const CANVAS_SIZE = 400;
-const POINT_THRESHOLD = POINT_RADIUS * 1.5;
+const LINE_WIDTH = 4;
 
 export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lastValidPointRef = useRef<Point | null>(null);
   const [currentLetter, setCurrentLetter] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [currentPoint, setCurrentPoint] = useState<number>(1);
-  const [completedPoints, setCompletedPoints] = useState<number[]>([]);
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const [currentStroke, setCurrentStroke] = useState<Point[]>([]);
   const [completedLetters, setCompletedLetters] = useState<string[]>([]);
-  const [points, setPoints] = useState<Point[]>([]);
   const [xp, setXp] = useState(0);
   const level = Math.floor(xp / 100) + 1;
 
@@ -40,62 +41,30 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
     ctx.textBaseline = 'middle';
     ctx.fillText(VOCALES[currentLetter], CANVAS_SIZE / 2, CANVAS_SIZE / 2);
 
-    const letterPath = LETTER_PATHS[VOCALES[currentLetter]];
-    if (!letterPath) return;
-
-    // Dibujar las líneas guía
-    ctx.beginPath();
-    ctx.strokeStyle = GUIDE_COLOR;
+    // Configurar el estilo para los trazos
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = LINE_WIDTH;
-    letterPath.segments.forEach(([start, end]) => {
-      const startPoint = letterPath.points[start];
-      const endPoint = letterPath.points[end];
-      ctx.moveTo(startPoint.x * CANVAS_SIZE, startPoint.y * CANVAS_SIZE);
-      ctx.lineTo(endPoint.x * CANVAS_SIZE, endPoint.y * CANVAS_SIZE);
-    });
-    ctx.stroke();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
-    // Dibujar los puntos de control
-    letterPath.points.forEach(point => {
-      ctx.beginPath();
-      ctx.fillStyle = completedPoints.includes(point.order)
-        ? COMPLETED_POINT_COLOR
-        : point.order === currentPoint
-        ? ACTIVE_POINT_COLOR
-        : POINT_COLOR;
-      
-      ctx.arc(
-        point.x * CANVAS_SIZE,
-        point.y * CANVAS_SIZE,
-        POINT_RADIUS,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-
-      // Dibujar el número del orden
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(
-        point.order.toString(),
-        point.x * CANVAS_SIZE,
-        point.y * CANVAS_SIZE
-      );
+    // Dibujar todos los trazos completados
+    strokes.forEach(stroke => {
+      if (stroke.points.length >= 2) {
+        ctx.beginPath();
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+          ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+        }
+        ctx.stroke();
+      }
     });
 
-    // Dibujar el trazo del usuario
-    if (points.length >= 2) {
+    // Dibujar el trazo actual
+    if (currentStroke.length >= 2) {
       ctx.beginPath();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = LINE_WIDTH;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
+      ctx.moveTo(currentStroke[0].x, currentStroke[0].y);
+      for (let i = 1; i < currentStroke.length; i++) {
+        ctx.lineTo(currentStroke[i].x, currentStroke[i].y);
       }
       ctx.stroke();
     }
@@ -112,68 +81,18 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
     canvas.height = CANVAS_SIZE;
     
     drawScene(ctx);
-  }, [currentLetter, currentPoint, completedPoints, points]);
-
-  const checkPointProximity = (x: number, y: number) => {
-    const letterPath = LETTER_PATHS[VOCALES[currentLetter]];
-    if (!letterPath) return;
-
-    const currentControlPoint = letterPath.points.find(p => p.order === currentPoint);
-    if (!currentControlPoint) return;
-
-    // Solo verificar si el último punto válido existe (excepto para el primer punto)
-    if (currentPoint > 1 && !lastValidPointRef.current) return;
-
-    const distance = Math.sqrt(
-      Math.pow((currentControlPoint.x * CANVAS_SIZE - x), 2) +
-      Math.pow((currentControlPoint.y * CANVAS_SIZE - y), 2)
-    );
-
-    if (distance < POINT_THRESHOLD) {
-      if (!completedPoints.includes(currentPoint)) {
-        lastValidPointRef.current = { x, y };
-        setCompletedPoints(prev => [...prev, currentPoint]);
-        AudioManager.playSound('success');
-
-        if (currentPoint === letterPath.points.length) {
-          handleLetterComplete();
-        } else {
-          setCurrentPoint(prev => prev + 1);
-        }
-      }
-    }
-  };
+  }, [currentLetter, strokes, currentStroke]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    // Solo permitir comenzar desde el primer punto si no hay puntos completados
-    if (completedPoints.length === 0) {
-      const firstPoint = LETTER_PATHS[VOCALES[currentLetter]]?.points[0];
-      if (firstPoint) {
-        const distance = Math.sqrt(
-          Math.pow((firstPoint.x * CANVAS_SIZE - x), 2) +
-          Math.pow((firstPoint.y * CANVAS_SIZE - y), 2)
-        );
-        
-        if (distance < POINT_THRESHOLD) {
-          setIsDrawing(true);
-          setPoints([{ x, y }]);
-          checkPointProximity(x, y);
-        }
-      }
-    } else {
-      // Continuar desde el último punto válido
-      if (lastValidPointRef.current) {
-        setIsDrawing(true);
-        setPoints([lastValidPointRef.current]);
-      }
-    }
+    
+    setCurrentStroke([{ x, y }]);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -186,19 +105,18 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    setPoints(prev => [...prev, { x, y }]);
-    checkPointProximity(x, y);
+    setCurrentStroke(prev => [...prev, { x, y }]);
   };
 
   const handleMouseUp = () => {
-    setIsDrawing(false);
-    // Si no alcanzamos el siguiente punto, volvemos al último punto válido
-    if (lastValidPointRef.current) {
-      setPoints([lastValidPointRef.current]);
+    if (currentStroke.length > 0) {
+      setStrokes(prev => [...prev, { points: currentStroke }]);
+      setCurrentStroke([]);
     }
+    setIsDrawing(false);
   };
 
-  const handleLetterComplete = () => {
+  const handleNextLetter = () => {
     const letra = VOCALES[currentLetter];
     if (!completedLetters.includes(letra)) {
       setCompletedLetters(prev => [...prev, letra]);
@@ -207,26 +125,18 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
     }
 
     if (currentLetter < VOCALES.length - 1) {
-      setTimeout(() => {
-        setCurrentLetter(prev => prev + 1);
-        setCurrentPoint(1);
-        setCompletedPoints([]);
-        setPoints([]);
-        lastValidPointRef.current = null;
-      }, 1000);
+      setCurrentLetter(prev => prev + 1);
+      setStrokes([]);
+      setCurrentStroke([]);
     } else {
-      setTimeout(() => {
-        alert('¡Felicitaciones! Has completado todas las vocales.');
-        onExit?.();
-      }, 1000);
+      alert('¡Felicitaciones! Has completado todas las vocales.');
+      onExit?.();
     }
   };
 
   const clearCanvas = () => {
-    setCurrentPoint(1);
-    setCompletedPoints([]);
-    setPoints([]);
-    lastValidPointRef.current = null;
+    setStrokes([]);
+    setCurrentStroke([]);
   };
 
   return (
@@ -239,7 +149,7 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
       
       <div className="trace-container">
         <h2>Traza la letra: {VOCALES[currentLetter]}</h2>
-        <p className="instructions">Dibuja siguiendo el orden de los puntos</p>
+        <p className="instructions">Dibuja la letra libremente</p>
         
         <div className="canvas-container">
           <canvas
@@ -250,9 +160,14 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
             onMouseLeave={handleMouseUp}
           />
           
-          <button className="clear-button" onClick={clearCanvas}>
-            Reintentar ✨
-          </button>
+          <div className="button-container">
+            <button className="clear-button" onClick={clearCanvas}>
+              Borrar ✨
+            </button>
+            <button className="next-button" onClick={handleNextLetter}>
+              Siguiente ➡️
+            </button>
+          </div>
         </div>
 
         <div className="progress-container">
