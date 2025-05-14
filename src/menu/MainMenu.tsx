@@ -3,19 +3,16 @@ import WriteWordGame from '../games/WriteWordGame/WriteWordGame';
 import TraceLetterGame from '../games/TraceLetterGame/TraceLetterGame';
 import GamePlaceholder from '../games/Common/GamePlaceholder';
 import TopBar from '../gui/TopBar';
+import { useUser } from '../context/UserContext';
 import './MainMenu.css';
 
 interface UserProfile {
   name: string;
-  level: number;
-  xp: number;
   avatar: string;
 }
 
 const MOCK_USER: UserProfile = {
   name: "Jugador",
-  level: 1,
-  xp: 0,
   avatar: "👤"
 };
 
@@ -39,9 +36,10 @@ export default function MainMenu() {
   // Estado para controlar el juego actual seleccionado
   const [juegoActual, setJuegoActual] = useState<string | null>(null);
   // Estado para mantener la información del usuario
-  const [user, setUser] = useState<UserProfile>(MOCK_USER);
+  const [user] = useState<UserProfile>(MOCK_USER);
   // Estado para controlar la visibilidad del perfil
   const [showProfile, setShowProfile] = useState(false);
+  const { xp, level } = useUser();
 
   /**
    * Maneja el retorno al menú principal desde un juego
@@ -55,15 +53,7 @@ export default function MainMenu() {
    * @param xpGained - Cantidad de experiencia ganada
    */
   const handleGameComplete = (xpGained: number) => {
-    setUser(prev => {
-      const newXp = prev.xp + xpGained;
-      const newLevel = Math.floor(newXp / 100) + 1; // Cada 100 XP = 1 nivel
-      return {
-        ...prev,
-        xp: newXp,
-        level: newLevel
-      };
-    });
+    // This function is no longer used in the new implementation
   };
 
   // Renderizado condicional basado en el juego seleccionado
@@ -83,15 +73,15 @@ export default function MainMenu() {
   return (
     <div className="main-menu">
       <TopBar 
-        overrideXp={user.xp} 
-        overrideLevel={user.level}
+        overrideXp={xp} 
+        overrideLevel={level}
       />
       
       <div className="menu-container">
         <div className="games-grid">
           {juegos.map(juego => {
             // Verifica si el juego está bloqueado según el nivel del usuario
-            const isLocked = user.level < juego.nivel_requerido;
+            const isLocked = level < juego.nivel_requerido;
             
             return (
               <button

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '../../core/logic/audioPlayer';
 import TopBar from '../../gui/TopBar';
+import { useUser } from '../../context/UserContext';
 import './TraceLetterGame.css';
 
 interface TraceLetterGameProps {
@@ -28,8 +29,7 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [currentStroke, setCurrentStroke] = useState<Point[]>([]);
   const [completedLetters, setCompletedLetters] = useState<string[]>([]);
-  const [xp, setXp] = useState(0);
-  const level = Math.floor(xp / 100) + 1;
+  const { xp, level, addXp } = useUser();
 
   const drawScene = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -70,74 +70,90 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
     }
   };
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE;
-    
-    drawScene(ctx);
-  }, [currentLetter, strokes, currentStroke]);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    setCurrentStroke([{ x, y }]);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    setCurrentStroke(prev => [...prev, { x, y }]);
-  };
-
-  const handleMouseUp = () => {
-    if (currentStroke.length > 0) {
-      setStrokes(prev => [...prev, { points: currentStroke }]);
-      setCurrentStroke([]);
-    }
-    setIsDrawing(false);
-  };
-
   const handleNextLetter = () => {
-    const letra = VOCALES[currentLetter];
-    if (!completedLetters.includes(letra)) {
-      setCompletedLetters(prev => [...prev, letra]);
-      setXp(prev => prev + XP_POR_LETRA);
-      AudioManager.playSound('success');
-    }
-
     if (currentLetter < VOCALES.length - 1) {
-      setCurrentLetter(prev => prev + 1);
-      setStrokes([]);
-      setCurrentStroke([]);
+      // Reproducir sonido de éxito
+      AudioManager.playSound('success');
+      
+      // Esperar a que termine el sonido antes de cambiar de letra
+      setTimeout(() => {
+        setCurrentLetter(prev => prev + 1);
+        setStrokes([]);
+        setCurrentStroke([]);
+        addXp(XP_POR_LETRA);
+        setCompletedLetters(prev => [...prev, VOCALES[currentLetter]]);
+      }, 1000);
     } else {
-      alert('¡Felicitaciones! Has completado todas las vocales.');
-      onExit?.();
+      // Si es la última letra, reproducir el sonido y mostrar mensaje
+      AudioManager.playSound('success');
+      setTimeout(() => {
+        alert('¡Felicitaciones! Has completado todas las vocales.');
+        onExit?.();
+      }, 1000);
     }
   };
 
   const clearCanvas = () => {
     setStrokes([]);
     setCurrentStroke([]);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      drawScene(ctx);
+    }
   };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setCurrentStroke([{ x, y }]);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setCurrentStroke(prev => [...prev, { x, y }]);
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        drawScene(ctx);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDrawing) {
+      setStrokes(prev => [...prev, { points: currentStroke }]);
+      setCurrentStroke([]);
+      setIsDrawing(false);
+    }
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.width = CANVAS_SIZE;
+      canvas.height = CANVAS_SIZE;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        drawScene(ctx);
+      }
+    }
+  }, [currentLetter, strokes, currentStroke]);
+
+  // Reproducir el sonido de la letra actual cuando cambia
+  useEffect(() => {
+    AudioManager.playSound('letter', VOCALES[currentLetter]);
+  }, [currentLetter]);
 
   return (
     <div className="trace-game">

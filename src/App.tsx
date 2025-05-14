@@ -1,6 +1,11 @@
 import React from 'react';
 import MainMenu from './menu/MainMenu';
+import { UserProvider } from './context/UserContext';
 
 export default function App() {
-  return <MainMenu />;
+  return (
+    <UserProvider>
+      <MainMenu />
+    </UserProvider>
+  );
 }

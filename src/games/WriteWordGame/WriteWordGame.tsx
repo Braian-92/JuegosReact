@@ -5,6 +5,7 @@ import BaseScene from '../../scenes/BaseScene';
 import SpinningCube from '../../scenes/environments/SpinningCube';
 import FloatingKeyboard from '../../gui/FloatingKeyboard';
 import TopBar from '../../gui/TopBar';
+import { useUser } from '../../context/UserContext';
 
 /**
  * Interfaz que define las propiedades que puede recibir el componente WriteWordGame
@@ -22,14 +23,14 @@ interface WriteModuleProps {
 // Constante que define los puntos de experiencia ganados por cada palabra completada
 const XP_POR_PALABRA = 5;
 
-// Array de palabras disponibles para el juego
+// Array de palabras disponibles para el juego, ordenadas alfabéticamente
 const WORDS = [
   'ARDILLA', 'BALLENA', 'CABALLO', 'DELFIN', 'ELEFANTE',
   'FOCA', 'GATO', 'HIPOPOTAMO', 'IGUANA', 'JIRAFA',
   'KOALA', 'LORO', 'MARIPOSA', 'NANDU', 'NUTRIA',
   'OSO', 'PERRO', 'QUIRQUINCHO', 'RATON', 'SAPO',
   'TORTUGA', 'URRACA', 'VACA', 'YACARE', 'ZORRO'
-];
+].sort();
 
 /**
  * Componente principal del juego de escritura de palabras
@@ -41,37 +42,48 @@ const WORDS = [
  * 4. Comunica el progreso a través del TopBar (XP y nivel)
  */
 export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteModuleProps) {
-  // Estado para la palabra actual - puede ser inicializada desde props o usar la primera palabra del array
-  const [currentWord, setCurrentWord] = useState<string>(word || WORDS[0]);
-  // Estado para el texto ingresado por el usuario
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [input, setInput] = useState<string>('');
-  // Estado para tracking de letras correctas
   const [correctLetters, setCorrectLetters] = useState<boolean[]>([]);
-  // Estados para métricas del juego que pueden ser importantes para componentes superiores
   const [completedWords, setCompletedWords] = useState<number>(0);
   const [mistakes, setMistakes] = useState<number>(0);
-  const [xp, setXp] = useState<number>(0);
+  const { xp, level, addXp } = useUser();
 
   // Configuración visual y cálculo del nivel basado en XP
   const textScale = 2.2;
-  const level = Math.floor(xp / 100) + 1;
+  const currentWord = word || WORDS[currentWordIndex];
 
-  /**
-   * Manejador de entrada de letras
-   * Este callback es crucial para la interacción del usuario y la lógica del juego
-   * Comunica los resultados mediante efectos de sonido y actualización visual
-   */
-  const handleLetterInput = useCallback((key: string) => {
-    const nextLetter = currentWord[input.length];
-    if (key === nextLetter) {
-      AudioManager.playSound('letter', key);
-      setInput(prev => prev + key);
-      setCorrectLetters(prev => [...prev, true]);
+  const handleLetterInput = (letter: string) => {
+    if (letter === currentWord[input.length]) {
+      // Reproducir sonido de la letra correcta
+      AudioManager.playSound('letter', letter);
+      
+      const newCorrectLetters = [...correctLetters];
+      newCorrectLetters[input.length] = true;
+      setCorrectLetters(newCorrectLetters);
+      setInput(prev => prev + letter);
+
+      if (input.length + 1 === currentWord.length) {
+        // Palabra completada
+        setCompletedWords(prev => prev + 1);
+        addXp(XP_POR_PALABRA);
+        
+        // Reproducir sonido de éxito
+        AudioManager.playSound('success');
+        
+        // Reiniciar para la siguiente palabra
+        setTimeout(() => {
+          setCurrentWordIndex(prevIndex => (prevIndex + 1) % WORDS.length);
+          setInput('');
+          setCorrectLetters([]);
+        }, 1000); // Esperar 1 segundo antes de cambiar de palabra
+      }
     } else {
+      // Reproducir sonido de error
       AudioManager.playSound('error');
       setMistakes(prev => prev + 1);
     }
-  }, [currentWord, input]);
+  };
 
   /**
    * Efecto para reproducir el sonido de la palabra
@@ -82,7 +94,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
       AudioManager.playSound('word', currentWord);
     }, delayMs);
     return () => clearTimeout(timeout);
-  }, [currentWord]);
+  }, [currentWord, delayMs]);
 
   /**
    * Efecto para manejar eventos del teclado físico
@@ -98,29 +110,6 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleLetterInput]);
-
-  /**
-   * Efecto para manejar la finalización de una palabra
-   * Este efecto es clave en la comunicación del progreso:
-   * 1. Actualiza XP que se muestra en TopBar
-   * 2. Incrementa contador de palabras completadas
-   * 3. Prepara el juego para la siguiente palabra
-   */
-  useEffect(() => {
-    if (input === currentWord) {
-      AudioManager.playSound('success');
-      // Comunica el progreso incrementando XP
-      setXp(prev => prev + XP_POR_PALABRA);
-      const nextIndex = (WORDS.indexOf(currentWord) + 1) % WORDS.length;
-      setCompletedWords(prev => prev + 1);
-      
-      setTimeout(() => {
-        setCurrentWord(WORDS[nextIndex]);
-        setInput('');
-        setCorrectLetters([]);
-      }, delayMs);
-    }
-  }, [input, currentWord]);
 
   /**
    * Callback para inicializar la escena 3D
