@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { playLetter, playWord, playSuccessSound, playErrorSound } from '../../core/logic/audioPlayer';
+import { AudioManager } from '../../core/logic/audioPlayer';
 import BaseScene from '../../scenes/BaseScene';
 import SpinningCube from '../../scenes/environments/SpinningCube';
 import FloatingKeyboard from '../../gui/FloatingKeyboard';
@@ -36,18 +36,18 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
   const handleLetterInput = useCallback((key: string) => {
     const nextLetter = currentWord[input.length];
     if (key === nextLetter) {
-      playLetter(key);
+      AudioManager.playSound('letter', key);
       setInput(prev => prev + key);
       setCorrectLetters(prev => [...prev, true]);
     } else {
-      playErrorSound();
+      AudioManager.playSound('error');
       setMistakes(prev => prev + 1);
     }
   }, [currentWord, input]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      playWord(currentWord);
+      AudioManager.playSound('word', currentWord);
     }, delayMs);
     return () => clearTimeout(timeout);
   }, [currentWord]);
@@ -65,7 +65,7 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
 
   useEffect(() => {
     if (input === currentWord) {
-      playSuccessSound();
+      AudioManager.playSound('success');
       setXp(prev => prev + XP_POR_PALABRA);
       const nextIndex = (WORDS.indexOf(currentWord) + 1) % WORDS.length;
       setCompletedWords(prev => prev + 1);
