@@ -44,7 +44,7 @@
   "display": "standalone",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
-  "orientation": "portrait",
+  "orientation": "any",
   "categories": ["education", "games", "kids"],
   "screenshots": [
     {
