@@ -2,10 +2,12 @@
   "name": "juego-three-react",
   "version": "1.0.0",
   "private": true,
-  "homepage": "./",
+  "homepage": "/JuegoEscritura",
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.6.0",
     "react-scripts": "^5.0.1",
     "three": "^0.155.0"
   },

@@ -12,5 +12,6 @@ root.render(
   </React.StrictMode>
 );
 
-// Registrar el service worker para soporte offline
-serviceWorker.register();
+// Temporalmente deshabilitado mientras resolvemos problemas de configuración
+// serviceWorker.register();
+serviceWorker.unregister(); // Desregistramos el service worker existente

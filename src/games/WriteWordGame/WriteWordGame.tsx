@@ -32,6 +32,10 @@ const WORDS = [
   'TORTUGA', 'URRACA', 'VACA', 'YACARE', 'ZORRO'
 ].sort();
 
+// Constantes de configuración
+const VERTICAL_POSITION = 40; // 40% desde arriba (ajustable entre 1-100)
+const KEYBOARD_HEIGHT = '200px'; // Altura aproximada del teclado
+
 /**
  * Componente principal del juego de escritura de palabras
  * 
@@ -124,33 +128,96 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
       <TopBar overrideXp={xp} overrideLevel={level} extraButton={{ label: '↩ Volver', onClick: onExit }} />
       <BaseScene onSceneReady={handleSceneReady} />
 
-      <div className="content-container">
-        <h2>Escribí la palabra:</h2>
-        <h1 style={{ fontSize: '4rem', letterSpacing: '1rem' }}>
-          {currentWord.split('').map((letter, idx) => {
-            const typed = input[idx];
-            const correct = correctLetters[idx];
-            const isNext = idx === input.length;
-            let color = 'white';
-            let textDecoration = 'none';
+      {/* Stats flotantes en la esquina superior derecha */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(var(--topbar-height) + 2.5rem)',
+        right: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        zIndex: 2
+      }}>
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.6)',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '0.75rem',
+          backdropFilter: 'blur(5px)',
+          color: '#4CAF50',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)'
+        }}>
+          <span style={{ fontSize: '1.75rem' }}>✅</span>
+          <span style={{ fontSize: '1.1rem' }}>Palabras: {completedWords}</span>
+        </div>
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.6)',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '0.75rem',
+          backdropFilter: 'blur(5px)',
+          color: '#FF5252',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)'
+        }}>
+          <span style={{ fontSize: '1.75rem' }}>❌</span>
+          <span style={{ fontSize: '1.1rem' }}>Errores: {mistakes}</span>
+        </div>
+      </div>
 
-            if (typed) {
-              color = correct ? 'lightgreen' : 'white';
-            } else if (isNext) {
-              color = 'violet';
-              textDecoration = 'underline';
-            }
+      {/* Contenedor principal con altura ajustada para excluir el teclado */}
+      <div style={{ 
+        height: `calc(100vh - var(--topbar-height) - ${KEYBOARD_HEIGHT})`,
+        position: 'relative'
+      }}>
+        {/* Contenedor del texto con posición vertical configurable */}
+        <div style={{ 
+          position: 'absolute',
+          top: `${VERTICAL_POSITION}%`,
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          textAlign: 'center',
+          padding: '0 2rem'
+        }}>
+          <div style={{ 
+            fontSize: '7rem', 
+            letterSpacing: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '8rem'
+          }}>
+            {currentWord.split('').map((letter, idx) => {
+              const typed = input[idx];
+              const correct = correctLetters[idx];
+              const isNext = idx === input.length;
+              let color = 'white';
+              let textDecoration = 'none';
 
-            return (
-              <span key={idx} style={{ color, textDecoration }}>
-                {letter}
-              </span>
-            );
-          })}
-        </h1>
-        <div style={{ marginTop: '2rem' }}>
-          <p>Palabras completas: {completedWords}</p>
-          <p>Errores: {mistakes}</p>
+              if (typed) {
+                color = correct ? '#4CAF50' : '#FF5252';
+              } else if (isNext) {
+                color = '#E1BEE7';
+                textDecoration = 'underline';
+              }
+
+              return (
+                <span key={idx} style={{ 
+                  color, 
+                  textDecoration,
+                  textShadow: '0 4px 8px rgba(0,0,0,0.5)',
+                  display: 'inline-block',
+                  transition: 'all 0.3s ease'
+                }}>
+                  {letter}
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
 

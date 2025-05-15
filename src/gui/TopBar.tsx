@@ -3,6 +3,8 @@ import './TopBar.css';
 import FriendsSidebar from './FriendsSidebar';
 import InventoryPanel from './InventoryPanel';
 import LevelBar from './LevelBar';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 interface TopBarProps {
   overrideXp?: number;
@@ -17,12 +19,19 @@ export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBa
   const [showSidebar, setShowSidebar] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
 
-  const xp = overrideXp ?? 0;
-  const level = overrideLevel ?? Math.floor(xp / 100) + 1;
+  const xp = overrideXp ?? user?.xp ?? 0;
+  const level = overrideLevel ?? user?.level ?? 1;
 
   const toggleSidebar = () => setShowSidebar(prev => !prev);
   const toggleInventory = () => setShowInventory(prev => !prev);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -41,17 +50,24 @@ export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBa
   return (
     <>
       <div className="top-bar">
-        <button className="top-button">🧑 Usuario</button>
+        <div className="top-left">
+          <button className="top-button">👤 Usuario Demo 1</button>
+          <button className="top-button" onClick={handleLogout}>🚪 Salir</button>
+        </div>
 
         <div className="top-center">
-          <LevelBar xp={xp} level={level} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="counter">{level}</div>
+            <LevelBar xp={xp} level={level} />
+            <div className="counter">100</div>
+          </div>
           <button className="top-button">⭐ {xp}</button>
           <button className="top-button" onClick={toggleInventory}>
-            {showInventory ? '✖️ Inventario' : '🧳 Inventario'}
+            🎒 Inventario
           </button>
         </div>
 
-        <div className="top-right" style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="top-right">
           {extraButton && (
             <button className="top-button" onClick={extraButton.onClick}>
               {extraButton.label}
@@ -61,7 +77,7 @@ export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBa
             {isFullscreen ? '↙️ Minimizar' : '↗️ Maximizar'}
           </button>
           <button className="top-button" onClick={toggleSidebar}>
-            {showSidebar ? '✖️ Amigos' : '👥 Amigos'}
+            👥 Amigos
           </button>
         </div>
       </div>

@@ -1,0 +1,43 @@
+# Archivo de prueba - Solo comentario 
+
+# Habilitar rewrite engine
+RewriteEngine On
+
+# Configuración básica
+Options -MultiViews
+Options -Indexes
+
+# Configuración de tipos MIME
+AddType application/javascript .js
+AddType application/json .json
+AddType text/css .css
+AddType audio/mpeg .mp3
+AddType audio/wav .wav
+AddType audio/ogg .ogg
+
+# Configuración de CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    
+    # Headers de seguridad
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Archivos estáticos
+<FilesMatch "\.(js|json|css|png|jpg|jpeg|gif|ico|mp3|wav|ogg)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Regla básica para la API
+RewriteCond %{REQUEST_URI} ^/JuegoEscritura/api/ [NC]
+RewriteRule ^JuegoEscritura/api/(.*)$ JuegoEscritura/api/index.php [QSA,L]
+
+# SPA fallback - regla básica
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [QSA,L] 
