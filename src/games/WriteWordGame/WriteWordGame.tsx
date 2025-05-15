@@ -120,11 +120,11 @@ export default function WriteWordGame({ word, delayMs = 1000, onExit }: WriteMod
   }, []);
 
   return (
-    <div style={{ position: 'relative', zIndex: 1 }}>
+    <div className="page-container">
       <TopBar overrideXp={xp} overrideLevel={level} extraButton={{ label: '↩ Volver', onClick: onExit }} />
       <BaseScene onSceneReady={handleSceneReady} />
 
-      <div style={{ textAlign: 'center', marginTop: '4rem', transform: `scale(${textScale})`, transformOrigin: 'top center' }}>
+      <div className="content-container">
         <h2>Escribí la palabra:</h2>
         <h1 style={{ fontSize: '4rem', letterSpacing: '1rem' }}>
           {currentWord.split('').map((letter, idx) => {

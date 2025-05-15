@@ -71,16 +71,15 @@ export default function MainMenu() {
 
   // Renderizado del menú principal
   return (
-    <div className="main-menu">
+    <div className="page-container">
       <TopBar 
         overrideXp={xp} 
         overrideLevel={level}
       />
       
-      <div className="menu-container">
+      <div className="content-container">
         <div className="games-grid">
           {juegos.map(juego => {
-            // Verifica si el juego está bloqueado según el nivel del usuario
             const isLocked = level < juego.nivel_requerido;
             
             return (

@@ -156,45 +156,46 @@ export default function TraceLetterGame({ onExit }: TraceLetterGameProps) {
   }, [currentLetter]);
 
   return (
-    <div className="trace-game">
-      <TopBar 
-        overrideXp={xp} 
-        overrideLevel={level}
-        extraButton={{ label: '↩ Volver', onClick: onExit }}
-      />
+    <div className="page-container">
+      <TopBar overrideXp={xp} overrideLevel={level} extraButton={{ label: '↩ Volver', onClick: onExit }} />
       
-      <div className="trace-container">
-        <h2>Traza la letra: {VOCALES[currentLetter]}</h2>
-        <p className="instructions">Dibuja la letra libremente</p>
+      <div className="content-container">
+        <h2>{currentLetter}</h2>
+        <p className="instructions">Dibujá la letra siguiendo los puntos</p>
         
         <div className="canvas-container">
           <canvas
             ref={canvasRef}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           />
-          
           <div className="button-container">
             <button className="clear-button" onClick={clearCanvas}>
-              Borrar ✨
+              Borrar
             </button>
             <button className="next-button" onClick={handleNextLetter}>
-              Siguiente ➡️
+              Siguiente
             </button>
           </div>
         </div>
 
         <div className="progress-container">
-          {VOCALES.map((letra, index) => (
+          {VOCALES.map((letter, index) => (
             <div
-              key={letra}
+              key={letter}
               className={`progress-letter ${
-                completedLetters.includes(letra) ? 'completed' : ''
-              } ${currentLetter === index ? 'current' : ''}`}
+                completedLetters.includes(letter)
+                  ? 'completed'
+                  : letter === VOCALES[currentLetter]
+                  ? 'current'
+                  : ''
+              }`}
             >
-              {letra}
+              {letter}
             </div>
           ))}
         </div>

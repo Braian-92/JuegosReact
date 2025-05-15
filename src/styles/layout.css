@@ -1,0 +1,33 @@
+/* Variables globales para el layout */
+:root {
+  --topbar-height: 3rem;
+  --content-padding: 2rem;
+}
+
+/* Contenedor principal para páginas con TopBar */
+.page-container {
+  position: relative;
+  min-height: 100vh;
+  padding-top: var(--topbar-height);
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* Contenedor para el contenido principal, centrado y con padding */
+.content-container {
+  min-height: calc(100vh - var(--topbar-height));
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--content-padding);
+  box-sizing: border-box;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+  :root {
+    --content-padding: 1rem;
+  }
+} 
