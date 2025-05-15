@@ -51,7 +51,7 @@ export default function TopBar({ overrideXp, overrideLevel, extraButton }: TopBa
     <>
       <div className="top-bar">
         <div className="top-left">
-          <button className="top-button">👤 Usuario Demo 1</button>
+          <button className="top-button">👤 {user?.nombre || 'Usuario'}</button>
           <button className="top-button" onClick={handleLogout}>🚪 Salir</button>
         </div>
 
