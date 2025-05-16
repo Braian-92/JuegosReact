@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import WriteWordGame from '../games/WriteWordGame/WriteWordGame';
 import TraceLetterGame from '../games/TraceLetterGame/TraceLetterGame';
+import MemoryGame from '../games/MemoryGame/MemoryGame';
 import GamePlaceholder from '../games/Common/GamePlaceholder';
 import TopBar from '../gui/TopBar';
 import { useUser } from '../context/UserContext';
@@ -63,6 +64,10 @@ export default function MainMenu() {
 
   if (juegoActual === 'trazo') {
     return <TraceLetterGame onExit={handleVolver} />;
+  }
+
+  if (juegoActual === 'memoria') {
+    return <MemoryGame onExit={handleVolver} />;
   }
 
   if (juegoActual) {
