@@ -65,7 +65,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        credentials: 'include',
         mode: 'cors',
         body: JSON.stringify({ email, password })
       });
