@@ -2,7 +2,7 @@
 // Configuración de la base de datos
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');     // Cambiar por tu usuario de MySQL
-define('DB_PASS', '');         // Cambiar por tu contraseña de MySQL
+define('DB_PASS', 'Evelyn.4771.4771');         // Cambiar por tu contraseña de MySQL
 define('DB_NAME', 'juegos_react');
 
 // Configuración de CORS para desarrollo

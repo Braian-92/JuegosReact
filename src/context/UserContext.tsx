@@ -62,8 +62,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${config.API_URL}/auth/login.php`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
+        mode: 'cors',
         body: JSON.stringify({ email, password })
       });
 

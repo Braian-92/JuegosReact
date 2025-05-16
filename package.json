@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "homepage": "/JuegoEscritura",
+  "proxy": "https://kitsune-design.com",
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
