@@ -19,7 +19,7 @@ const XP_PER_MATCH = 10;
 const GRID_SIZE = 4; // 4x4 grid = 16 cards = 8 pares
 
 export default function MemoryGame({ onExit }: MemoryGameProps) {
-    const { addXp } = useUser();
+    const { addXp, xp, level } = useUser();
     const [cards, setCards] = useState<Card[]>([]);
     const [flippedCards, setFlippedCards] = useState<number[]>([]);
     const [isLocked, setIsLocked] = useState(false);
@@ -108,7 +108,11 @@ export default function MemoryGame({ onExit }: MemoryGameProps) {
 
     return (
         <div className="memory-game-container">
-            <TopBar />
+            <TopBar 
+                overrideXp={xp} 
+                overrideLevel={level}
+                extraButton={{ label: '↩ Volver', onClick: onExit }}
+            />
             <div className="memory-game-content">
                 <h2>Juego de Memoria</h2>
                 <div className="memory-grid">
@@ -125,9 +129,6 @@ export default function MemoryGame({ onExit }: MemoryGameProps) {
                         </div>
                     ))}
                 </div>
-                <button className="exit-button" onClick={onExit}>
-                    Volver al Menú
-                </button>
             </div>
         </div>
     );

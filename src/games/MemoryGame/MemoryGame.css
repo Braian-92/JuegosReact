@@ -1,13 +1,18 @@
 .memory-game-container {
+    position: relative;
     min-height: 100vh;
+    padding-top: var(--topbar-height);
+    box-sizing: border-box;
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    padding: 20px;
 }
 
 .memory-game-content {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    height: calc(100vh - var(--topbar-height));
+    display: flex;
+    flex-direction: column;
 }
 
 .memory-game-content h2 {
@@ -23,6 +28,7 @@
     gap: 10px;
     margin: 0 auto;
     max-width: 600px;
+    width: 100%;
 }
 
 .memory-card {
@@ -71,23 +77,6 @@
 
 .memory-card.matched .memory-card-back {
     background: #e8f5e9;
-}
-
-.exit-button {
-    display: block;
-    margin: 30px auto 0;
-    padding: 12px 24px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.exit-button:hover {
-    background: #c0392b;
 }
 
 /* Responsive design */
