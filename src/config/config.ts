@@ -4,7 +4,7 @@ interface Config {
 }
 
 const config: Config = {
-    API_URL: 'https://kitsune-design.com/JuegoEscritura/api',
+    API_URL: 'https://node.kitsune-design.com/JuegoEscritura/api',
     APP_VERSION: '1.0.0'
 };
 
